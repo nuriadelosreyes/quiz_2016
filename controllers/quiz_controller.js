@@ -36,13 +36,26 @@ exports.ownershipRequired = function(req, res, next){
 // GET /quizzes
 exports.index = function(req, res, next) {
   
-	models.Quiz.findAll()
-		.then(function(quizzes) {
-			res.render('quizzes/index.ejs', { quizzes: quizzes});
-		})
-		.catch(function(error) {
-			next(error);
-		});
+	var search = req.query.search || '';
+  if(search==''){
+  models.Quiz.findAll()
+    .then(function(quizzes) {
+      res.render('quizzes/index.ejs', { quizzes: quizzes});
+    })
+    .catch(function(error) {
+      next(error);
+    });
+  }
+  else{
+    models.Quiz.findAll({where:{question: {$like: '%'+ req.query.search+'%'}}}).then(function(quizzes){
+  if(quizzes){
+    res.render('quizzes/index.ejs',{quizzes:quizzes});}
+  else{
+    throw new Error('No hay preguntas en la BBDD.');
+  }
+  }).catch(function(error){ next(error);});
+
+  }
 };
 
 
